@@ -221,35 +221,19 @@ class LeaseForm extends Form
             // === UPDATE EXPECTED PAYMENTS (optional: recalculate) ===
             ExpectedPayment::where('lease_id', $lease->id)->delete();
 
-            $start = Carbon::parse($this->start_date);
-            $end = Carbon::parse($this->end_date);
+            $start = Carbon::parse($this->start_date)->startOfMonth();
+            $end = Carbon::parse($this->end_date)->endOfMonth();
 
-            $isStartFull = $start->isSameDay($start->copy()->startOfMonth());
-            $isEndFull = $end->isSameDay($end->copy()->endOfMonth());
+            $current = $start->copy();
 
-            if ($isStartFull && $isEndFull) {
-                $months = $start->diffInMonths($end);
-                $current = $start->copy();
-
-                for ($i = 0; $i < $months; $i++) {
-                    $expectedDate = $current->copy()->endOfMonth();
-
-                    ExpectedPayment::create([
-                        'lease_id' => $lease->id,
-                        'payment_date' => $expectedDate,
-                        'status' => 'unpaid',
-                    ]);
-
-                    $current->addMonth();
-                }
-            } else {
-                $expectedDate = $end->copy()->endOfMonth();
-
+            while ($current <= $end) {
                 ExpectedPayment::create([
                     'lease_id' => $lease->id,
-                    'payment_date' => $expectedDate,
+                    'payment_date' => $current->copy()->endOfMonth(),
                     'status' => 'unpaid',
                 ]);
+
+                $current->addMonth();
             }
 
             DB::commit();
