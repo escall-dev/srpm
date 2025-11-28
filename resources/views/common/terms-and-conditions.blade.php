@@ -72,7 +72,7 @@
         <h2 class="text-2xl font-semibold text-neutral-800 dark:text-neutral-200 mt-8 mb-3">9. Contact Information</h2>
         <p class="text-neutral-600 dark:text-neutral-400 mb-4">
             For any questions or concerns regarding these terms, please contact our support team at
-            <a href="mailto:support@leaseman.com" class="text-indigo-600 hover:underline">support@srpm.com</a>.
+            <a href="mailto:srpm.support@srpm.site" class="text-indigo-600 hover:underline">srpm.support@srpm.site</a>.
         </p>
 
         <p class="text-neutral-500 text-sm mt-12">
