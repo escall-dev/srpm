@@ -317,7 +317,7 @@
                  <x-ui.field>
                      <x-ui.label for="Lease" text="Documents" />
                      <x-ui.description>Upload the lease documents for the selected unit and tenant (PDF, DOCX, JPG & PNG)</x-ui.description>
-                     <x-filepond::upload :max-files="5" :multiple="true" wire:model="form.lease_documents" />
+                     <x-filepond::upload :max-files="5" :multiple="true" accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png" wire:model="form.lease_documents" />
                  </x-ui.field>
              </div>
 
