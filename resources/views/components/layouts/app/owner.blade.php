@@ -5,7 +5,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @include('partials.head-scripts')
     </head>
-    <body class="min-h-screen bg-background antialiased font-poppins relative">
+    <body class="min-h-screen bg-background antialiased font-poppins relative bg-[url('/storage/app/public/assets/images/bg.jpg')] backdrop-blur-2xl backdrop-brightness-120 dark:backdrop-brightness-25 bg-cover bg-center bg-no-repeat">
         <div class="mx-auto flex min-h-screen flex-col" x-data="{
                 sidebarOpen: false,
             }">
