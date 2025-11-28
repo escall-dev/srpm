@@ -19,7 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 'permission' => Spatie\Permission\Middleware\PermissionMiddleware::class,
                 'role_or_permission' => Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
                 'auth.timeout' => \JulioMotol\AuthTimeout\Middlewares\CheckAuthTimeout::class,
-            ]);
+            ])
+            ->redirectGuestsTo(fn () => route('home'))
+            ->redirectUsersTo(fn () => route('home'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
