@@ -11,6 +11,7 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
+        "cdsmths/laravel-ocr-space": "^1.0",
         "juliomotol/laravel-auth-timeout": "^4.2",
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",

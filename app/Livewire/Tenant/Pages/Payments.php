@@ -72,7 +72,6 @@ class Payments extends Component
     {
         if (! $this->form->submit()) {
             $this->toastError('Failed to add payment');
-            $this->cancelModal();
             return;
         }
         $this->toastSuccess('Payment added successfully');

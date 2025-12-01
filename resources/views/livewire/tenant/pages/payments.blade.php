@@ -400,7 +400,7 @@
                 <x-ui.field>
                     <x-ui.label for="proof" text="Proof of Payment" />
                     <x-ui.description>Upload proof of payment documents (JPG & PNG)</x-ui.description>
-                    <x-filepond::upload :max-files="3" :multiple="true" :accept="'image/jpeg,image/png'" wire:model="form.proof" />
+                    <x-filepond::upload :max-files="1" :multiple="true" :accept="'image/jpeg,image/png'" wire:model="form.proof" />
                 </x-ui.field>
             </div>
 

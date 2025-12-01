@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\Tenant;
 
+use App\Actions\VerifyProofOfPayment;
 use App\Models\Payment;
 use App\Models\ExpectedPayment;
 use App\Models\PaymentMethod;
@@ -61,8 +62,12 @@ class PayForm extends Form
             $folderPath = "payments/lease_{$lease->id}";
             Storage::disk('public')->makeDirectory($folderPath);
 
-            // 2️⃣ Save proofs and collect their paths
+            // 2️⃣ Verify and save proofs and collect their paths
+            $action = app(VerifyProofOfPayment::class);
+
             $proofPaths = [];
+            $proofResult = null;
+
             foreach ($this->proof as $file) {
                 // Get original filename and sanitize
                 $originalName = $file->getClientOriginalName();
@@ -72,10 +77,50 @@ class PayForm extends Form
                 $path = $file->storeAs($folderPath, $safeName, 'public');
 
                 $proofPaths[] = $path; // relative to storage/app/public
+
+                // Optionally verify the proof using OCR
+                if (!$proofResult) {
+                    $proofResult = $action->handle(storage_path('app/public/' . $path));
+                }
+            }
+
+            // Validate if the amount does not exceed or is less than expected payment
+            if (floatval($this->amount) != floatval(($lease->rent_price  + ($this->expectedPayment->penalty ? $this->expectedPayment->penalty->amount : 0)))) {
+                DB::rollBack();
+                $this->addError('form', 'The payment amount must match the expected payment amount of ' . number_format(($lease->rent_price  + ($this->expectedPayment->penalty ? $this->expectedPayment->penalty->amount : 0)), 2) . '.');
+                return false;
+            }
+
+            // Check if OCR failed
+            if (!$proofResult['success']) {
+                DB::rollBack();
+                $this->addError('form', 'Unable to analyze the uploaded proof. Please upload a clearer image.');
+                return false;
+            }
+
+            // Validate GCash Number
+            if (empty($proofResult['number']) || $proofResult['number'] !== $this->account_number) {
+                DB::rollBack();
+                $this->addError('form', 'GCash number does not match the uploaded receipt.');
+                return false;
+            }
+
+            // Validate Amount
+            if (empty($proofResult['amount']) || floatval($proofResult['amount']) != floatval($this->amount)) {
+                DB::rollBack();
+                $this->addError('form', 'Amount does not match the uploaded receipt.');
+                return false;
+            }
+
+            // Validate Reference Number
+            if (empty($proofResult['reference_number']) || $proofResult['reference_number'] != $this->reference_number) {
+                DB::rollBack();
+                $this->addError('form', 'Reference number does not match the uploaded receipt.');
+                return false;
             }
 
             // 3️⃣ Update expected payment status
-            $this->expectedPayment->update(['status' => 'pending']);
+            $this->expectedPayment->update(['status' => 'paid']);
 
             // 4️⃣ Create payment record
             Payment::create([
