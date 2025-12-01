@@ -376,30 +376,30 @@
                 <!-- Account Name -->
                 <x-ui.field>
                     <x-ui.label for="account_name" text="Account Name" />
-                    <x-ui.input type="text" id="account_name" wire:model="form.account_name" placeholder="Enter account name" clearable />
+                    <x-ui.input type="text" id="account_name" wire:model="form.account_name" placeholder="Enter your account name" clearable />
                 </x-ui.field>
 
                 <!-- Account Number -->
                 <x-ui.field>
                     <x-ui.label for="account_number" text="Account Number" />
-                    <x-ui.input type="text" id="account_number" wire:model="form.account_number" placeholder="Enter account number" clearable />
+                    <x-ui.input type="text" id="account_number" wire:model="form.account_number" placeholder="Enter your account number" clearable />
                 </x-ui.field>
 
                 <!-- Reference Number -->
                 <x-ui.field>
                     <x-ui.label for="reference_number" text="Reference Number" />
-                    <x-ui.input type="text" id="reference_number" wire:model="form.reference_number" placeholder="Enter reference number" clearable />
+                    <x-ui.input type="text" id="reference_number" wire:model="form.reference_number" placeholder="Enter your GCash reference number" clearable />
                 </x-ui.field>
 
                 <!-- Payment Amount -->
                 <x-ui.field>
                     <x-ui.label for="price" text="Payment Amount" />
-                    <x-ui.input id="price" type="number" step="0.01" min="0" clearable placeholder="Enter amount" wire:model="form.amount" />
+                    <x-ui.input id="price" type="number" step="0.01" min="0" clearable placeholder="Enter your payment amount" wire:model="form.amount" />
                 </x-ui.field>
                 <!-- Proof of payment -->
                 <x-ui.field>
-                    <x-ui.label for="proof" text="Proof of Payment" />
-                    <x-ui.description>Upload proof of payment documents (JPG & PNG)</x-ui.description>
+                    <x-ui.label for="proof" text="Upload Your Proof of Payment" />
+                    <x-ui.description>Upload 1 proof of payment document (JPG & PNG)</x-ui.description>
                     <x-filepond::upload :max-files="1" :multiple="true" :accept="'image/jpeg,image/png'" wire:model="form.proof" />
                 </x-ui.field>
             </div>
