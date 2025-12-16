@@ -83,7 +83,7 @@ Laravel requires the following PHP extensions:
 ## 📥 **1. Clone the Repository**
 
 ```bash
-git clone https://github.com/Ahadon13/SRPM.git
+git clone https://github.com/Ahadon13/SRPM-Client.git
 ```
 
 Go inside the project:
