@@ -138,6 +138,7 @@ class PayForm extends Form
         } catch (\Exception $e) {
             DB::rollBack();
             $this->addError('form', 'An error occurred while processing your payment. Please try again.');
+            $this->addError('form', 'Error: ' . $e->getMessage());
             return false;
         }
     }

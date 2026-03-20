@@ -41,9 +41,10 @@ class VerifyProofOfPayment
             $amount = floatval(str_replace(',', '', $amount));
         }
 
-        // Extract Reference Number (Ref No. or Ref #)
-        preg_match('/Ref(?:erence)?\s*No\.?\s*[:\-]?\s*(\d+)/i', $parsedText, $ref);
-        $reference = $ref[1] ?? null;
+       // Extract Reference Number (Ref No. or Ref #)
+        preg_match('/Ref(?:erence)?\s*No\.?\s*[:\-]?\s*(\d+(?:\s\d+)*)/i', $parsedText, $ref);
+        // Clean up: Remove the spaces from the result so you get "9036643068401" from "9036 6430 6840 1"
+        $reference = isset($ref[1]) ? str_replace(' ', '', $ref[1]) : null;
 
         // Extract GCash Number
         $numberPatterns = [
