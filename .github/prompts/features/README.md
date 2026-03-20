@@ -12,6 +12,7 @@ Use these plans independently to avoid cross-feature ambiguity and reduce implem
 8. plan-feature-08-warning-enforcement-flow.prompt.md
 9. plan-feature-09-notification-system.prompt.md
 10. plan-feature-10-smart-automation.prompt.md
+11. plan-feature-11-onboarding-tour-first-login.prompt.md
 
 ### Recommended Execution Order
 1. 03 Complaint System Core
@@ -24,7 +25,9 @@ Use these plans independently to avoid cross-feature ambiguity and reduce implem
 8. 10 Smart Automation
 9. 01 FAQ Management System
 10. 02 Tenant FAQ View
+11. 11 Onboarding Tour for First-Time Login
 
 ### Notes
 - Plans 01 and 02 are FAQ-focused and can be implemented in parallel with complaint tracks after schema alignment.
 - Keep decisions fixed: demerits come from approved complaints only; FAQ scope is per property.
+- Plan 11 is independent from complaint/demerit logic and can be implemented in parallel after role layouts are confirmed.

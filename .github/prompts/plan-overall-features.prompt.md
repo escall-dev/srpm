@@ -14,10 +14,11 @@ Use the standalone plans under `.github/prompts/features` to implement each requ
 8. `.github/prompts/features/plan-feature-08-warning-enforcement-flow.prompt.md`
 9. `.github/prompts/features/plan-feature-09-notification-system.prompt.md`
 10. `.github/prompts/features/plan-feature-10-smart-automation.prompt.md`
+11. `.github/prompts/features/plan-feature-11-onboarding-tour-first-login.prompt.md`
 
 Execution guide: `.github/prompts/features/README.md`
 
-Implement all 10 requested features by extending existing SRPM structures (especially requests, notifications, owner/tenant Livewire pages, and scheduled commands), while adding only essential tables/columns for FAQ, feedback, demerit tracking, and automation logging. Recommended approach: keep the existing request pipeline as the complaint backbone, add typed complaint metadata (general/specific), attach demerit and enforcement logic to owner approval decisions, and reuse the existing in-app notification system plus scheduler.
+Implement all 11 requested features by extending existing SRPM structures (especially requests, notifications, owner/tenant Livewire pages, and scheduled commands), while adding only essential tables/columns for FAQ, feedback, demerit tracking, automation logging, and onboarding progress. Recommended approach: keep the existing request pipeline as the complaint backbone, add typed complaint metadata (general/specific), attach demerit and enforcement logic to owner approval decisions, reuse the existing in-app notification system plus scheduler, and add a role-aware first-login onboarding tour with persistent progress.
 
 **Steps**
 1. Phase 1 - Data Model Alignment (*blocks all later phases*)
