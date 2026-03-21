@@ -84,6 +84,50 @@
         </x-ui.card>
     </div>
 
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <x-ui.card hoverless size="full">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-semibold text-neutral-800 dark:text-neutral-200">Tenant Enforcement</h3>
+                <x-ui.badge color="sky">Policy Status</x-ui.badge>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="rounded-lg border border-neutral-200 dark:border-neutral-700 p-3">
+                    <p class="text-neutral-500">Normal</p>
+                    <p class="text-xl font-semibold text-emerald-600">{{ $enforcementSummary['normal'] ?? 0 }}</p>
+                </div>
+                <div class="rounded-lg border border-neutral-200 dark:border-neutral-700 p-3">
+                    <p class="text-neutral-500">Warned</p>
+                    <p class="text-xl font-semibold text-sky-600">{{ $enforcementSummary['warned'] ?? 0 }}</p>
+                </div>
+                <div class="rounded-lg border border-neutral-200 dark:border-neutral-700 p-3">
+                    <p class="text-neutral-500">Final Warning</p>
+                    <p class="text-xl font-semibold text-amber-600">{{ $enforcementSummary['final_warning'] ?? 0 }}</p>
+                </div>
+                <div class="rounded-lg border border-neutral-200 dark:border-neutral-700 p-3">
+                    <p class="text-neutral-500">Terminated</p>
+                    <p class="text-xl font-semibold text-rose-600">{{ $enforcementSummary['terminated'] ?? 0 }}</p>
+                </div>
+            </div>
+        </x-ui.card>
+
+        <x-ui.card hoverless size="full">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-semibold text-neutral-800 dark:text-neutral-200">Critical Alerts</h3>
+                <a href="{{ route('owner.dashboard') }}" class="text-primary hover:underline text-sm">Latest 5</a>
+            </div>
+            <div class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                @forelse($criticalNotifications as $alert)
+                <div class="py-2">
+                    <p class="text-sm text-neutral-800 dark:text-neutral-200">{{ $alert->message }}</p>
+                    <p class="text-xs text-neutral-500 mt-1">{{ $alert->created_at->diffForHumans() }}</p>
+                </div>
+                @empty
+                <p class="text-sm text-neutral-500 dark:text-neutral-400 py-4">No critical alerts yet.</p>
+                @endforelse
+            </div>
+        </x-ui.card>
+    </div>
+
     {{-- === Chart Section === --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <x-ui.card hoverless size="full">

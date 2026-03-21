@@ -69,13 +69,29 @@
                     <div class="flex items-center justify-center shrink-0 size-10 rounded-full bg-rose-100 dark:bg-rose-900/40 dark:text-rose-300">
                         <x-ui.icon name="ps:scroll" class="size-5 !text-rose-600" />
                     </div>
-                    @elseif ($notif->type === 'payment_due')
+                    @elseif ($notif->type === 'payment_due' || $notif->type === 'rent_due_reminder')
                     <div class="flex items-center justify-center shrink-0 size-10 rounded-full bg-orange-100 dark:bg-orange-900/40 dark:text-orange-300">
                         <x-ui.icon name="ps:hand-coins" class="size-5 !text-orange-600" />
                     </div>
                     @elseif ($notif->type === 'maintenance_update')
                     <div class="flex items-center justify-center shrink-0 size-10 rounded-full bg-amber-100 dark:bg-amber-900/40 dark:text-amber-300">
                         <x-ui.icon name="ps:hand-coins" class="size-5 !text-amber-600" />
+                    </div>
+                    @elseif ($notif->type === 'demerit_warning')
+                    <div class="flex items-center justify-center shrink-0 size-10 rounded-full bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-300">
+                        <x-ui.icon name="ps:warning-circle" class="size-5 !text-yellow-600" />
+                    </div>
+                    @elseif ($notif->type === 'demerit_final_warning')
+                    <div class="flex items-center justify-center shrink-0 size-10 rounded-full bg-amber-100 dark:bg-amber-900/40 dark:text-amber-300">
+                        <x-ui.icon name="ps:warning-octagon" class="size-5 !text-amber-600" />
+                    </div>
+                    @elseif ($notif->type === 'termination_notice')
+                    <div class="flex items-center justify-center shrink-0 size-10 rounded-full bg-rose-100 dark:bg-rose-900/40 dark:text-rose-300">
+                        <x-ui.icon name="ps:prohibit" class="size-5 !text-rose-600" />
+                    </div>
+                    @elseif ($notif->type === 'complaint_decision')
+                    <div class="flex items-center justify-center shrink-0 size-10 rounded-full bg-sky-100 dark:bg-sky-900/40 dark:text-sky-300">
+                        <x-ui.icon name="ps:chat-circle-dots" class="size-5 !text-sky-600" />
                     </div>
                     @else
                     <div class="flex items-center justify-center shrink-0 size-10 rounded-full bg-neutral-200 dark:bg-neutral-700">
@@ -86,7 +102,15 @@
                     {{-- DETAILS --}}
                     <div class="flex flex-col flex-1">
                         <h3 class="font-medium text-sm text-neutral-400 dark:text-neutral-500 {{ !$notif->is_read ? '!text-neutral-900 dark:!text-neutral-100' : '' }}">
-                            {{ $notif->type === 'lease_expiration' ? 'Lease Expiration' : ($notif->type === 'payment_due' ? 'Payment Due' : ($notif->type === 'maintenance_update' ? 'Maintenance Update' : 'Notification')) }}
+                            {{
+                                $notif->type === 'lease_expiration' ? 'Lease Expiration' :
+                                ($notif->type === 'payment_due' || $notif->type === 'rent_due_reminder' ? 'Rent Due Reminder' :
+                                ($notif->type === 'maintenance_update' ? 'Maintenance Update' :
+                                ($notif->type === 'demerit_warning' ? 'Demerit Warning' :
+                                ($notif->type === 'demerit_final_warning' ? 'Final Warning' :
+                                ($notif->type === 'termination_notice' ? 'Termination Notice' :
+                                ($notif->type === 'complaint_decision' ? 'Complaint Decision' : 'Notification'))))))
+                            }}
                         </h3>
                         <p class="text-xs text-neutral-400 dark:text-neutral-500 w-48 md:w-64 {{ !$notif->is_read ? '!text-neutral-900 dark:!text-neutral-100' : '' }}">
                             {{ $notif->message }}

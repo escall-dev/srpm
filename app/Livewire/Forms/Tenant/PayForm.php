@@ -6,6 +6,7 @@ use App\Actions\VerifyProofOfPayment;
 use App\Models\Payment;
 use App\Models\ExpectedPayment;
 use App\Models\PaymentMethod;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -53,6 +54,12 @@ class PayForm extends Form
     {
 
         $this->validate();
+
+        if (Auth::user()?->tenant?->isTerminated()) {
+            $this->addError('form', 'Your account is under termination status. You cannot submit payments.');
+            return false;
+        }
+
         DB::beginTransaction();
 
         try {

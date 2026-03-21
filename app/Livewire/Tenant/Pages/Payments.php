@@ -63,6 +63,10 @@ class Payments extends Component
 
     public function pay(ExpectedPayment $payment)
     {
+        if (! $this->ensureTenantCanWrite()) {
+            return;
+        }
+
         $this->selectedPayment = $payment;
         $this->form->expectedPayment = $payment;
         $this->dispatch('open-modal',  id: 'add-payment-modal' );
@@ -70,6 +74,10 @@ class Payments extends Component
 
     public function addPayment()
     {
+        if (! $this->ensureTenantCanWrite()) {
+            return;
+        }
+
         if (! $this->form->submit()) {
             $this->toastError('Failed to add payment');
             return;
@@ -129,5 +137,15 @@ class Payments extends Component
         $this->form->resetValidation();
         $this->dispatch('close-modal', id: 'add-payment-modal');
         $this->dispatch('filepond-reset-form.proof');
+    }
+
+    private function ensureTenantCanWrite(): bool
+    {
+        if (Auth::user()->tenant?->isTerminated()) {
+            $this->toastError('Your account is under termination status. Payment actions are disabled.');
+            return false;
+        }
+
+        return true;
     }
 }

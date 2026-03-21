@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 class Tenant extends Model
 {
@@ -19,7 +20,31 @@ class Tenant extends Model
      */
     protected $fillable = [
         'user_id',
+        'demerit_count',
+        'enforcement_status',
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'demerit_count' => 'integer',
+    ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Tenant $tenant) {
+            if ($tenant->demerit_count > 5) {
+                throw new InvalidArgumentException('Tenant demerit_count cannot exceed 5.');
+            }
+
+            if ($tenant->demerit_count < 0) {
+                throw new InvalidArgumentException('Tenant demerit_count cannot be negative.');
+            }
+        });
+    }
 
     public function latestPaidPayment()
     {
@@ -53,5 +78,15 @@ class Tenant extends Model
     public function leases(): HasMany
     {
         return $this->hasMany(Lease::class);
+    }
+
+    public function complaintDemerits(): HasMany
+    {
+        return $this->hasMany(ComplaintDemerit::class);
+    }
+
+    public function isTerminated(): bool
+    {
+        return $this->enforcement_status === 'terminated';
     }
 }

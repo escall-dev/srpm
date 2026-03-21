@@ -1,4 +1,13 @@
 <div class="space-y-6">
+    @if(auth()->user()->tenant?->isTerminated())
+    <x-ui.alerts type="warning" iconName="ps:warning-circle">
+        <x-slot:heading>Read-only access</x-slot:heading>
+        <x-slot:content>
+            Your account is under termination status. Payment submissions are disabled.
+        </x-slot:content>
+    </x-ui.alerts>
+    @endif
+
     {{-- === Header === --}}
     <div class="flex md:justify-between items-center gap-5">
         <div class="max-md:hidden">
@@ -230,10 +239,10 @@
                                     ₱{{ number_format($totalPayment, 2) }}
                                 </td>
                                 <td class="p-4">
-                                    @if($expected->lease->status === 'active')
+                                    @if($expected->lease->status === 'active' && !auth()->user()->tenant?->isTerminated())
                                         <x-ui.button size="sm" icon="ps:hand-deposit" wire:click="pay({{ $expected->id }})">Pay</x-ui.button>
                                     @else
-                                        <span class="text-sm text-neutral-500">(Lease is not active)</span>
+                                        <span class="text-sm text-neutral-500">({{ auth()->user()->tenant?->isTerminated() ? 'Action is blocked due to termination status' : 'Lease is not active' }})</span>
                                     @endif
                                 </td>
                             </tr>

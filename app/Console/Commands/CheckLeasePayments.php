@@ -63,7 +63,7 @@ class CheckLeasePayments extends Command
                         // Notify tenant
                         Notification::firstOrCreate([
                             'user_id' => $tenantUser->id,
-                            'type' => 'payment_due',
+                            'type' => Notification::TYPE_RENT_DUE_REMINDER,
                             'message' => "Your Payment is on {$paymentDate->format('F j, Y')}. Please pay on time to avoid penalties.",
                         ]);
                     }
@@ -72,7 +72,7 @@ class CheckLeasePayments extends Command
                     if ($ownerUserId) {
                         Notification::firstOrCreate([
                             'user_id' => $ownerUserId,
-                            'type' => 'payment_due',
+                            'type' => Notification::TYPE_RENT_DUE_REMINDER,
                             'message' => "Tenant {$tenantUser->full_name} has an upcoming rent payment due on {$paymentDate->format('F j, Y')}.",
                         ]);
                     }
@@ -88,7 +88,7 @@ class CheckLeasePayments extends Command
                         // Notify tenant
                         Notification::firstOrCreate([
                             'user_id' => $tenantUser->id,
-                            'type' => 'payment_due',
+                            'type' => Notification::TYPE_RENT_DUE_REMINDER,
                             'message' => "Your Payment was due on {$paymentDate->format('F j, Y')}. Please pay within the grace period to avoid penalties.",
                         ]);
                     }
@@ -97,7 +97,7 @@ class CheckLeasePayments extends Command
                     if ($ownerUserId) {
                         Notification::firstOrCreate([
                             'user_id' => $ownerUserId,
-                            'type' => 'payment_due',
+                            'type' => Notification::TYPE_RENT_DUE_REMINDER,
                             'message' => "Tenant {$tenantUser->full_name}'s payment for {$paymentDate->format('F j, Y')} is past due but still within the grace period.",
                         ]);
                     }
@@ -128,7 +128,7 @@ class CheckLeasePayments extends Command
                         if ($paymentRule->notify_tenant ?? false) {
                             Notification::firstOrCreate([
                                 'user_id' => $tenantUser->id,
-                                'type' => 'payment_due',
+                                'type' => Notification::TYPE_RENT_DUE_REMINDER,
                                 'message' => "You have been penalized ₱" . number_format($amount, 2) . " for late payment. Please pay your rent soon to avoid further penalties.",
                             ]);
                         }
@@ -137,7 +137,7 @@ class CheckLeasePayments extends Command
                         if ($ownerUserId) {
                             Notification::firstOrCreate([
                                 'user_id' => $ownerUserId,
-                                'type' => 'payment_due',
+                                'type' => Notification::TYPE_RENT_DUE_REMINDER,
                                 'message' => "Tenant {$tenantUser->full_name} has been penalized ₱" . number_format($amount, 2) . " for late rent payment (due {$paymentDate->format('F j, Y')}).",
                             ]);
                         }

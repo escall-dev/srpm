@@ -98,6 +98,69 @@
 
     </div>
 
+    <x-ui.card hoverless size="full">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <p class="text-sm text-neutral-500 dark:text-neutral-400">Enforcement Status</p>
+                <p class="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+                    {{ ucfirst(str_replace('_', ' ', $tenant?->enforcement_status ?? 'normal')) }}
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <x-ui.badge color="{{ ($tenant?->enforcement_status ?? 'normal') === 'terminated' ? 'rose' : (($tenant?->enforcement_status ?? 'normal') === 'final_warning' ? 'amber' : (($tenant?->enforcement_status ?? 'normal') === 'warned' ? 'sky' : 'emerald')) }}">
+                    Demerits: {{ $tenant?->demerit_count ?? 0 }}/5
+                </x-ui.badge>
+            </div>
+        </div>
+        @if(($tenant?->enforcement_status ?? 'normal') === 'terminated')
+        <p class="text-sm text-rose-600 dark:text-rose-300 mt-3">
+            Your account is in terminated status. Request and payment submissions are disabled.
+        </p>
+        @endif
+    </x-ui.card>
+
+    <x-ui.card hoverless size="full">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-semibold text-neutral-700 dark:text-neutral-300">Demerit History</h2>
+            <x-ui.badge color="{{ ($tenant?->demerit_count ?? 0) >= 5 ? 'rose' : (($tenant?->demerit_count ?? 0) >= 3 ? 'amber' : 'emerald') }}">
+                Total: {{ $tenant?->demerit_count ?? 0 }}/5
+            </x-ui.badge>
+        </div>
+
+        @if($this->demeritHistory->isEmpty())
+        <p class="text-sm text-neutral-500 dark:text-neutral-400 text-center py-4">
+            No demerit records yet.
+        </p>
+        @else
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700 text-sm">
+                <thead>
+                    <tr class="bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-200">
+                        <th class="p-4 text-left">Date</th>
+                        <th class="p-4 text-left">Complaint Ref</th>
+                        <th class="p-4 text-left">Points</th>
+                        <th class="p-4 text-left">Reason</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-100 dark:divide-neutral-700 text-neutral-600 dark:text-neutral-400">
+                    @foreach($this->demeritHistory as $entry)
+                    <tr>
+                        <td class="p-4">{{ $entry->awarded_at?->timezone('Asia/Manila')->format('M d, Y h:i A') ?? 'N/A' }}</td>
+                        <td class="p-4">#{{ $entry->request_id }}</td>
+                        <td class="p-4">
+                            <x-ui.badge color="{{ (int) $entry->points > 0 ? 'rose' : 'neutral' }}">
+                                {{ (int) $entry->points > 0 ? '+' . $entry->points : $entry->points }}
+                            </x-ui.badge>
+                        </td>
+                        <td class="p-4">{{ $entry->reason ?? 'No reason provided.' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+    </x-ui.card>
+
     {{-- Lease Info --}}
     <x-ui.card hoverless size="full">
         @if($lease)
@@ -124,9 +187,7 @@
 
     {{-- Unpaid Balance --}}
     <x-ui.card hoverless size="full">
-        @php
-        $unpaidPayments = $this->getPaymentsByStatus('unpaid');
-        @endphp
+        @php $unpaidPayments = $this->unpaidPayments; @endphp
 
         @if ($unpaidPayments->isEmpty())
         <x-ui.empty text="No Unpaid Payments" />

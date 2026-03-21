@@ -106,6 +106,10 @@ class Requests extends Component
 
     public function createRequest()
     {
+        if (! $this->ensureTenantCanWrite()) {
+            return;
+        }
+
         // Submit the form
         $this->form->submit();
 
@@ -124,6 +128,10 @@ class Requests extends Component
 
     public function deleteRequest()
     {
+        if (! $this->ensureTenantCanWrite()) {
+            return;
+        }
+
         if ($this->selectedRequest->status !== 'pending') {
             $this->toastError('Only pending requests can be deleted.');
             return;
@@ -162,5 +170,21 @@ class Requests extends Component
         if ($shouldResetPage) {
             $this->resetPage(); // Reset pagination to the first page
         }
+    }
+
+    #[Computed]
+    public function enforcementStatus(): string
+    {
+        return Auth::user()->tenant->enforcement_status ?? 'normal';
+    }
+
+    private function ensureTenantCanWrite(): bool
+    {
+        if (Auth::user()->tenant?->isTerminated()) {
+            $this->toastError('Your account is under termination status. Request actions are disabled.');
+            return false;
+        }
+
+        return true;
     }
 }

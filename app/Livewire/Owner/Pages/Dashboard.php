@@ -5,8 +5,11 @@ namespace App\Livewire\Owner\Pages;
 use App\Models\Payment;
 use App\Models\Request;
 use App\Models\Property;
+use App\Models\Notification;
+use App\Models\Tenant;
 use App\Models\Expense;
 use App\Livewire\Concerns\HasToast;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -22,7 +25,7 @@ class Dashboard extends Component
 
     public function mount(): void
     {
-        $owner = auth()->user()->owner;
+        $owner = Auth::user()->owner;
 
         $this->startDate = \Carbon\Carbon::now()->startOfYear()->toDateString(); // Jan 01 of this year
         $this->endDate = \Carbon\Carbon::now()->endOfYear()->toDateString();     // Dec 31 of this year
@@ -34,7 +37,7 @@ class Dashboard extends Component
      */
     public function updatedFilterPeriodIncome(string $period)
     {
-        $owner = auth()->user()->owner;
+        $owner = Auth::user()->owner;
         $property = Property::find($owner->active_property);
 
         $chartData = $this->getIncomeExpenseData($property, $period);
@@ -43,7 +46,7 @@ class Dashboard extends Component
 
    public function render()
     {
-        $owner = auth()->user()->owner;
+        $owner = Auth::user()->owner;
         $property = Property::find($owner->active_property);
 
         // Convert date range to Carbon instances (optional filters)
@@ -152,6 +155,28 @@ class Dashboard extends Component
             ],
         ];
 
+        $tenantsInProperty = Tenant::query()
+            ->whereHas('leases.unit', fn ($q) => $q->where('property_id', $property->id))
+            ->get();
+
+        $enforcementSummary = [
+            'normal' => $tenantsInProperty->where('enforcement_status', 'normal')->count(),
+            'warned' => $tenantsInProperty->where('enforcement_status', 'warned')->count(),
+            'final_warning' => $tenantsInProperty->where('enforcement_status', 'final_warning')->count(),
+            'terminated' => $tenantsInProperty->where('enforcement_status', 'terminated')->count(),
+        ];
+
+        $criticalNotifications = Notification::query()
+            ->where('user_id', Auth::id())
+            ->whereIn('type', [
+                Notification::TYPE_DEMERIT_WARNING,
+                Notification::TYPE_DEMERIT_FINAL_WARNING,
+                Notification::TYPE_TERMINATION_NOTICE,
+            ])
+            ->latest()
+            ->take(5)
+            ->get();
+
         return view('livewire.owner.pages.dashboard', compact(
             'recentPayments',
             'recentRequests',
@@ -163,7 +188,9 @@ class Dashboard extends Component
             'isNetIncomeHigher',
             'vacancyChart',
             'maintenanceUnits',
-            'expenseChartData'
+            'expenseChartData',
+            'enforcementSummary',
+            'criticalNotifications'
         ));
     }
 

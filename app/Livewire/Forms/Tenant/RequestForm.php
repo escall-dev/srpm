@@ -99,6 +99,13 @@ class RequestForm extends Form
         }
 
         $tenant = Auth::user()->tenant;
+
+        if ($tenant?->isTerminated()) {
+            throw ValidationException::withMessages([
+                'type' => 'Your account is under termination status. You cannot create new requests.',
+            ]);
+        }
+
         $complaintPriority = null;
         $ownerDecision = null;
 

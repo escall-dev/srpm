@@ -162,6 +162,12 @@
                     </p>
                 </div>
                 <div class="min-w-0">
+                    <p class="text-xs text-neutral-500 uppercase">Reported Tenant Demerits</p>
+                    <x-ui.badge color="{{ ($selectedRequest->reportedTenant->demerit_count ?? 0) >= 5 ? 'rose' : (($selectedRequest->reportedTenant->demerit_count ?? 0) >= 4 ? 'amber' : (($selectedRequest->reportedTenant->demerit_count ?? 0) >= 3 ? 'sky' : 'emerald')) }}">
+                        {{ $selectedRequest->reportedTenant->demerit_count ?? 0 }}/5
+                    </x-ui.badge>
+                </div>
+                <div class="min-w-0">
                     <p class="text-xs text-neutral-500 uppercase">Reported Unit</p>
                     <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
                         {{ $selectedRequest->reportedUnit->unit_number ?? 'N/A' }}

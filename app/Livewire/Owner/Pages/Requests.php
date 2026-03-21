@@ -4,7 +4,9 @@ namespace App\Livewire\Owner\Pages;
 
 use App\Livewire\Concerns\HasToast;
 use App\Models\Expense;
+use App\Models\Notification;
 use App\Models\Request;
+use App\Support\Services\DemeritService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
@@ -67,7 +69,12 @@ class Requests extends Component
 
     public function viewDetails(Request $request)
     {
-        $this->selectedRequest = $request;
+        $this->selectedRequest = $request->load([
+            'tenant.user',
+            'reportedTenant.user',
+            'reportedUnit',
+            'complaintDemerit',
+        ]);
         if($request->status === 'pending'){
             $this->isPending = true;
         }
@@ -110,6 +117,11 @@ class Requests extends Component
 
         $this->selectedRequest->update($updates);
 
+        if ($this->selectedRequest->type === 'complaint') {
+            app(DemeritService::class)->awardForApprovedComplaint($this->selectedRequest->fresh(), Auth::user());
+            $this->notifyComplaintDecision($this->selectedRequest->fresh(), 'approved');
+        }
+
         $this->toastSuccess('Request marked as In Progress.');
 
         $this->cancelModal();
@@ -141,6 +153,10 @@ class Requests extends Component
 
         $this->selectedRequest->update($updates);
 
+        if ($this->selectedRequest->type === 'complaint') {
+            $this->notifyComplaintDecision($this->selectedRequest->fresh(), 'rejected');
+        }
+
         $this->toastSuccess('Request has been Rejected.');
 
         $this->cancelModal();
@@ -168,5 +184,18 @@ class Requests extends Component
         if ($shouldResetPage) {
             $this->resetPage(); // Reset pagination to the first page
         }
+    }
+
+    private function notifyComplaintDecision(Request $request, string $decision): void
+    {
+        $tenantUserId = $request->tenant?->user_id;
+        if (! $tenantUserId) {
+            return;
+        }
+
+        $statusText = $decision === 'approved' ? 'approved' : 'rejected';
+        $message = "Your complaint request #{$request->id} has been {$statusText}.";
+
+        Notification::notifyOnce($tenantUserId, Notification::TYPE_COMPLAINT_DECISION, $message);
     }
 }

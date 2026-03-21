@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Model;
 
 class Request extends Model
@@ -67,5 +68,10 @@ class Request extends Model
     public function reportedUnit(): BelongsTo
     {
         return $this->belongsTo(Unit::class, 'reported_unit_id');
+    }
+
+    public function complaintDemerit(): HasOne
+    {
+        return $this->hasOne(ComplaintDemerit::class);
     }
 }

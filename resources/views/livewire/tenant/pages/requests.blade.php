@@ -1,4 +1,13 @@
 <div class="space-y-6">
+    @if($this->enforcementStatus === 'terminated')
+    <x-ui.alerts type="warning" iconName="ps:warning-circle">
+        <x-slot:heading>Read-only access</x-slot:heading>
+        <x-slot:content>
+            Your account is under termination status. Creating or deleting requests is disabled.
+        </x-slot:content>
+    </x-ui.alerts>
+    @endif
+
     {{-- Header --}}
     <div class="flex md:justify-between items-center gap-5">
         <div class="max-md:hidden">
@@ -29,7 +38,7 @@
                 <option value="completed">Completed</option>
              </select>
          </div>
-          <x-ui.button color="emerald" icon="plus" wire:click="$dispatch('open-modal', { id: 'request-modal' })">
+          <x-ui.button color="emerald" icon="plus" wire:click="$dispatch('open-modal', { id: 'request-modal' })" :disabled="$this->enforcementStatus === 'terminated'">
               Create Request/Complaint's
           </x-ui.button>
     </div>
