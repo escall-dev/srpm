@@ -9,12 +9,17 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 /**
- * Schedule the command to run every hour.
+ * Schedule the command to run daily.
  *
  * CheckLeasePayments command checks all leases for near or overdue payments
  * and applies penalties if needed.
  */
-Schedule::command('app:check-lease-payments')->hourly();
+Schedule::command('app:check-lease-payments')->daily();
+
+/**
+ * Schedule the demerit threshold reconciliation to run daily.
+ */
+Schedule::command('app:reconcile-demerit-thresholds')->daily();
 
 /**
  * Schedule the command to run every hour.

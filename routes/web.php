@@ -18,6 +18,7 @@ use App\Livewire\Owner\Common\Settings as OwnerSettings;
 use App\Livewire\Owner\Auth\Login as OwnerLogin;
 use App\Livewire\Owner\Auth\Register as OwnerRegister;
 use App\Livewire\Owner\Pages\Dashboard as OwnerDashboard;
+use App\Livewire\Owner\Pages\AutomationLogs as OwnerAutomationLogs;
 use App\Livewire\Owner\Pages\Leases;
 use App\Livewire\Owner\Pages\ViewLeaseDetails;
 use App\Livewire\Owner\Pages\Units as OwnerUnits;
@@ -126,6 +127,9 @@ Route::group([
         // REQUESTS
         Route::get('requests', OwnerRequests::class)
             ->name('requests');
+        // AUTOMATION LOGS
+        Route::get('automation-logs', OwnerAutomationLogs::class)
+            ->name('automation.logs');
         // PROPERTIES
         Route::get('properties', OwnerProperties::class)
             ->name('properties');

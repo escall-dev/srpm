@@ -2,6 +2,7 @@
 
 namespace App\Support\Services;
 
+use App\Models\AutomationLog;
 use App\Models\ComplaintDemerit;
 use App\Models\Notification;
 use App\Models\Request;
@@ -56,10 +57,74 @@ class DemeritService
                 $subjectTenant->demerit_count = min(self::DEMERIT_CAP, $subjectTenant->demerit_count + 1);
                 $subjectTenant->save();
 
-                $this->handleThresholdTransitions($subjectTenant, $request);
+                $this->handleThresholdTransitions(
+                    $subjectTenant,
+                    $request->unit?->property?->owner?->user_id
+                );
             }
 
             return $ledger;
+        });
+    }
+
+    /**
+     * @param  list<int>  $ownerUserIds
+     * @return array{
+     *   status_changed: bool,
+     *   previous_status: string,
+     *   current_status: string,
+     *   terminated_lease_ids: list<int>,
+     *   created_notifications: list<array{id: int, user_id: int, type: string}>
+     * }
+     */
+    public function reconcileTenantThresholds(Tenant $tenant, array $ownerUserIds = []): array
+    {
+        return DB::transaction(function () use ($tenant, $ownerUserIds) {
+            $tenant = Tenant::query()
+                ->with(['user', 'leases.unit.property.owner'])
+                ->lockForUpdate()
+                ->findOrFail($tenant->id);
+
+            $previousStatus = (string) $tenant->enforcement_status;
+            $targetStatus = $this->resolveEnforcementStatus((int) $tenant->demerit_count);
+
+            $statusChanged = false;
+            if ($previousStatus !== $targetStatus) {
+                $tenant->enforcement_status = $targetStatus;
+                $tenant->save();
+                $statusChanged = true;
+            }
+
+            $terminatedLeaseIds = [];
+            if ($targetStatus === 'terminated') {
+                $activeLeases = $tenant->leases()->where('status', 'active')->get();
+                foreach ($activeLeases as $activeLease) {
+                    $activeLease->terminate();
+                    $terminatedLeaseIds[] = $activeLease->id;
+                }
+            }
+
+            $derivedOwnerIds = $tenant->leases
+                ->map(fn ($lease) => $lease->unit?->property?->owner?->user_id)
+                ->filter()
+                ->values()
+                ->all();
+
+            $createdNotifications = $this->dispatchThresholdNotifications(
+                $tenant,
+                $targetStatus,
+                array_values(array_unique(array_merge($ownerUserIds, $derivedOwnerIds))),
+            );
+
+            $this->logCreatedNotifications($tenant, $createdNotifications);
+
+            return [
+                'status_changed' => $statusChanged,
+                'previous_status' => $previousStatus,
+                'current_status' => $targetStatus,
+                'terminated_lease_ids' => $terminatedLeaseIds,
+                'created_notifications' => $createdNotifications,
+            ];
         });
     }
 
@@ -72,16 +137,11 @@ class DemeritService
         return "Approved complaint #{$request->id} ({$topic}).";
     }
 
-    private function handleThresholdTransitions(Tenant $tenant, Request $request): void
+    private function handleThresholdTransitions(Tenant $tenant, ?int $ownerUserId = null): void
     {
-        $newStatus = match ($tenant->demerit_count) {
-            3 => 'warned',
-            4 => 'final_warning',
-            5 => 'terminated',
-            default => null,
-        };
+        $newStatus = $this->resolveEnforcementStatus((int) $tenant->demerit_count);
 
-        if (! $newStatus || $tenant->enforcement_status === $newStatus) {
+        if ($newStatus === 'normal' || $tenant->enforcement_status === $newStatus) {
             return;
         }
 
@@ -95,13 +155,37 @@ class DemeritService
                 ->each(fn ($lease) => $lease->terminate());
         }
 
-        $this->dispatchThresholdNotifications($tenant, $newStatus, $request);
+        $createdNotifications = $this->dispatchThresholdNotifications(
+            $tenant,
+            $newStatus,
+            $ownerUserId ? [$ownerUserId] : [],
+        );
+
+        $this->logCreatedNotifications($tenant, $createdNotifications);
     }
 
-    private function dispatchThresholdNotifications(Tenant $tenant, string $status, Request $request): void
+    private function resolveEnforcementStatus(int $demeritCount): string
     {
+        return match (true) {
+            $demeritCount >= 5 => 'terminated',
+            $demeritCount === 4 => 'final_warning',
+            $demeritCount === 3 => 'warned',
+            default => 'normal',
+        };
+    }
+
+    /**
+     * @param  list<int>  $ownerUserIds
+     * @return list<array{id: int, user_id: int, type: string}>
+     */
+    private function dispatchThresholdNotifications(Tenant $tenant, string $status, array $ownerUserIds = []): array
+    {
+        if ($status === 'normal') {
+            return [];
+        }
+
         $tenantUserId = $tenant->user_id;
-        $ownerUserId = $request->unit?->property?->owner?->user_id;
+        $ownerUserIds = array_values(array_unique(array_filter($ownerUserIds)));
 
         $tenantMessage = match ($status) {
             'warned' => 'You reached 3 demerits. This is an official warning. Please avoid further violations.',
@@ -125,15 +209,55 @@ class DemeritService
         };
 
         if (! $type) {
-            return;
+            return [];
         }
+
+        $createdNotifications = [];
 
         if ($tenantUserId && $tenantMessage) {
-            Notification::notifyOnce($tenantUserId, $type, $tenantMessage);
+            $notification = Notification::notifyOnce($tenantUserId, $type, $tenantMessage);
+            if ($notification->wasRecentlyCreated) {
+                $createdNotifications[] = [
+                    'id' => $notification->id,
+                    'user_id' => $tenantUserId,
+                    'type' => $type,
+                ];
+            }
         }
 
-        if ($ownerUserId && $ownerMessage) {
-            Notification::notifyOnce($ownerUserId, $type, $ownerMessage);
+        if ($ownerMessage) {
+            foreach ($ownerUserIds as $ownerUserId) {
+                $notification = Notification::notifyOnce($ownerUserId, $type, $ownerMessage);
+                if ($notification->wasRecentlyCreated) {
+                    $createdNotifications[] = [
+                        'id' => $notification->id,
+                        'user_id' => $ownerUserId,
+                        'type' => $type,
+                    ];
+                }
+            }
+        }
+
+        return $createdNotifications;
+    }
+
+    /**
+     * @param  list<array{id: int, user_id: int, type: string}>  $createdNotifications
+     */
+    private function logCreatedNotifications(Tenant $tenant, array $createdNotifications): void
+    {
+        foreach ($createdNotifications as $createdNotification) {
+            AutomationLog::create([
+                'action_type' => 'demerit_notification_emitted',
+                'reference_type' => Notification::class,
+                'reference_id' => $createdNotification['id'],
+                'payload' => [
+                    'tenant_id' => $tenant->id,
+                    'user_id' => $createdNotification['user_id'],
+                    'type' => $createdNotification['type'],
+                ],
+                'executed_at' => now(),
+            ]);
         }
     }
 }

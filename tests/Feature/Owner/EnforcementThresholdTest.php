@@ -44,6 +44,11 @@ class EnforcementThresholdTest extends TestCase
             'type' => Notification::TYPE_DEMERIT_WARNING,
         ]);
 
+        $this->assertDatabaseHas('automation_logs', [
+            'action_type' => 'demerit_notification_emitted',
+            'reference_type' => Notification::class,
+        ]);
+
         $reportedTenant->refresh()->update([
             'demerit_count' => 4,
             'enforcement_status' => 'final_warning',
@@ -67,6 +72,10 @@ class EnforcementThresholdTest extends TestCase
             'user_id' => $reportedTenant->user_id,
             'type' => Notification::TYPE_TERMINATION_NOTICE,
         ]);
+
+        $this->assertGreaterThanOrEqual(2, \App\Models\AutomationLog::query()
+            ->where('action_type', 'demerit_notification_emitted')
+            ->count());
     }
 
     private function createContext(): array
