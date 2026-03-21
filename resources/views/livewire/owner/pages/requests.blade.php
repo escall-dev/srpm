@@ -61,7 +61,13 @@
                             {{ $request->unit->unit_number ?? 'N/A' }}
                         </td>
                         <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">
+                            @if($request->type === 'complaint' && $request->complaint_type)
+                            <x-ui.badge color="{{ $request->complaint_type === 'specific' ? 'rose' : 'amber' }}">
+                                {{ 'Complaint / ' . ucfirst($request->complaint_type) . ' / ' . (($request->complaint_priority ?? 'standard') === 'high' ? 'High Priority' : 'Standard') }}
+                            </x-ui.badge>
+                            @else
                             {{ ucfirst($request->type) }}
+                            @endif
                         </td>
                         <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200 max-w-xs truncate">
                             {{ $request->description }}
@@ -102,34 +108,82 @@
         @if($selectedRequest)
         <div class="space-y-6 w-full mb-5">
             {{-- Tenant & Unit --}}
-            <div class="flex gap-5 w-full">
-                <div class="w-full">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 w-full">
+                <div class="min-w-0">
                     <p class="text-xs text-neutral-500 uppercase">Tenant / Complainant</p>
-                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
                         {{ $selectedRequest->tenant->user->full_name ?? 'N/A' }}
                     </p>
                 </div>
-                <div class="w-full">
+                <div class="min-w-0">
                     <p class="text-xs text-neutral-500 uppercase">Unit Number</p>
-                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
                         {{ $selectedRequest->unit->unit_number ?? 'N/A' }}
                     </p>
                 </div>
-                <div class="w-full">
+                <div class="min-w-0">
                     <p class="text-xs text-neutral-500 uppercase">Type</p>
-                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
                         {{ ucfirst($selectedRequest->type) }}
                     </p>
                 </div>
-                <div class="w-full">
+                @if($selectedRequest->type === 'complaint')
+                <div class="min-w-0 lg:col-span-2 xl:col-span-2">
+                    <p class="text-xs text-neutral-500 uppercase">Queue Label</p>
+                    <x-ui.badge color="{{ $selectedRequest->complaint_type === 'specific' ? 'rose' : 'amber' }}">
+                        {{ 'Complaint / ' . ucfirst($selectedRequest->complaint_type ?? 'general') . ' / ' . (($selectedRequest->complaint_priority ?? 'standard') === 'high' ? 'High Priority' : 'Standard') }}
+                    </x-ui.badge>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs text-neutral-500 uppercase">Complaint Type</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
+                        {{ ucfirst($selectedRequest->complaint_type ?? 'N/A') }}
+                    </p>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs text-neutral-500 uppercase">Priority</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
+                        {{ ucfirst($selectedRequest->complaint_priority ?? 'N/A') }}
+                    </p>
+                </div>
+                @if($selectedRequest->complaint_type === 'general')
+                <div class="min-w-0">
+                    <p class="text-xs text-neutral-500 uppercase">Complaint Topic</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
+                        {{ ucfirst(str_replace('_', ' ', $selectedRequest->complaint_topic ?? 'N/A')) }}
+                    </p>
+                </div>
+                @endif
+                @if($selectedRequest->complaint_type === 'specific')
+                <div class="min-w-0">
+                    <p class="text-xs text-neutral-500 uppercase">Reported Tenant</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
+                        {{ $selectedRequest->reportedTenant->user->full_name ?? 'N/A' }}
+                    </p>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs text-neutral-500 uppercase">Reported Unit</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
+                        {{ $selectedRequest->reportedUnit->unit_number ?? 'N/A' }}
+                    </p>
+                </div>
+                @endif
+                <div class="min-w-0">
+                    <p class="text-xs text-neutral-500 uppercase">Owner Decision</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
+                        {{ ucfirst(str_replace('_', ' ', $selectedRequest->owner_decision ?? 'pending_review')) }}
+                    </p>
+                </div>
+                @endif
+                <div class="min-w-0">
                     <p class="text-xs text-neutral-500 uppercase">Status</p>
                       <x-ui.badge color="{{ $selectedRequest->status === 'pending' ? 'amber' : ($selectedRequest->status === 'in_progress' ? 'sky' : ($selectedRequest->status === 'rejected' ? 'rose' : 'emerald')) }}">
                           {{ ucfirst(str_replace('_', ' ', $selectedRequest->status)) }}
                       </x-ui.badge>
                 </div>
-                <div class="w-full">
+                <div class="min-w-0">
                     <p class="text-xs text-neutral-500 uppercase">Date Created</p>
-                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100 break-words">
                         {{ $selectedRequest->created_at?->timezone('Asia/Manila')->format('M d, Y h:i A') ?? 'N/A' }}
                     </p>
                 </div>

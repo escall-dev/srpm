@@ -6,6 +6,7 @@ use App\Livewire\Concerns\HasToast;
 use App\Models\Lease;
 use App\Models\Request;
 use App\Models\Tenant;
+use App\Models\Unit;
 use App\Livewire\Forms\Tenant\RequestForm;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -66,6 +67,41 @@ class Requests extends Component
     public function activeLease()
     {
         return Lease::where('tenant_id', Auth::user()->tenant->id)->where('status', 'active')->latest()->first();
+    }
+
+    #[Computed]
+    public function propertyTenants()
+    {
+        $activeLease = $this->activeLease();
+        $propertyId = $activeLease?->unit?->property_id;
+
+        if (! $propertyId) {
+            return collect();
+        }
+
+        return Tenant::query()
+            ->with('user')
+            ->whereHas('leases', fn ($query) =>
+                $query->where('status', 'active')
+                    ->whereHas('unit', fn ($unitQuery) => $unitQuery->where('property_id', $propertyId))
+            )
+            ->get();
+    }
+
+    #[Computed]
+    public function propertyUnits()
+    {
+        $activeLease = $this->activeLease();
+        $propertyId = $activeLease?->unit?->property_id;
+
+        if (! $propertyId) {
+            return collect();
+        }
+
+        return Unit::query()
+            ->where('property_id', $propertyId)
+            ->orderBy('unit_number')
+            ->get();
     }
 
     public function createRequest()

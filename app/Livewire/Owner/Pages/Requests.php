@@ -5,6 +5,7 @@ namespace App\Livewire\Owner\Pages;
 use App\Livewire\Concerns\HasToast;
 use App\Models\Expense;
 use App\Models\Request;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
 use Livewire\WithPagination;
@@ -29,7 +30,7 @@ class Requests extends Component
     #[Computed]
     public function requests()
     {
-        $propertyId = auth()->user()->owner->active_property;
+        $propertyId = Auth::user()->owner->active_property;
 
         return Request::query()
             ->whereHas('unit', fn($q) => $q->where('property_id', $propertyId))
@@ -44,6 +45,10 @@ class Requests extends Component
                             $u->where('unit_number', 'like', "%{$this->search}%")
                         )
                         ->orWhere('type', 'like', "%{$this->search}%")
+                        ->orWhere('complaint_type', 'like', "%{$this->search}%")
+                        ->orWhere('complaint_topic', 'like', "%{$this->search}%")
+                        ->orWhere('complaint_priority', 'like', "%{$this->search}%")
+                        ->orWhere('owner_decision', 'like', "%{$this->search}%")
                         ->orWhere('description', 'like', "%{$this->search}%")
                         ->orWhere('status', 'like', "%{$this->search}%");
                 })
@@ -86,7 +91,7 @@ class Requests extends Component
             'form.description.max' => 'The description may not be greater than 255 characters.',
         ]);
         // Create expense record
-        $owner = auth()->user()->owner;
+        $owner = Auth::user()->owner;
         Expense::create([
             'property_id' => $owner->active_property,
             'type' => $this->form['type'],
@@ -94,9 +99,16 @@ class Requests extends Component
             'description' => $this->form['description'] ?? null,
         ]);
         // Update request status
-        $this->selectedRequest->update([
+        $updates = [
             'status' => 'in_progress',
-        ]);
+        ];
+
+        if ($this->selectedRequest->type === 'complaint') {
+            $updates['owner_decision'] = 'approved';
+            $updates['owner_decision_at'] = now();
+        }
+
+        $this->selectedRequest->update($updates);
 
         $this->toastSuccess('Request marked as In Progress.');
 
@@ -118,9 +130,16 @@ class Requests extends Component
     public function rejectRequest()
     {
         // Update request status
-        $this->selectedRequest->update([
+        $updates = [
             'status' => 'rejected',
-        ]);
+        ];
+
+        if ($this->selectedRequest->type === 'complaint') {
+            $updates['owner_decision'] = 'rejected';
+            $updates['owner_decision_at'] = now();
+        }
+
+        $this->selectedRequest->update($updates);
 
         $this->toastSuccess('Request has been Rejected.');
 

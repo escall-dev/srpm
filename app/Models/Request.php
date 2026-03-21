@@ -20,13 +20,21 @@ class Request extends Model
         'unit_id',
         'tenant_id',
         'type',
+        'complaint_type',
+        'complaint_topic',
+        'complaint_priority',
+        'reported_tenant_id',
+        'reported_unit_id',
         'description',
         'image_path',
         'status',
+        'owner_decision',
+        'owner_decision_at',
     ];
 
     protected $casts = [
         'image_path' => 'array',
+        'owner_decision_at' => 'datetime',
     ];
 
     /**
@@ -43,5 +51,21 @@ class Request extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    /**
+     * Get the reported tenant for a specific complaint.
+     */
+    public function reportedTenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'reported_tenant_id');
+    }
+
+    /**
+     * Get the reported unit for a specific complaint.
+     */
+    public function reportedUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'reported_unit_id');
     }
 }

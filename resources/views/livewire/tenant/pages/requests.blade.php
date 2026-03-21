@@ -60,6 +60,11 @@
                         </td>
                         <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">
                             {{ ucfirst($request->type) }}
+                            @if($request->type === 'complaint' && $request->complaint_type)
+                            <span class="block text-xs text-neutral-500 dark:text-neutral-400">
+                                {{ ucfirst($request->complaint_type) }} / {{ ucfirst($request->complaint_priority ?? 'standard') }}
+                            </span>
+                            @endif
                         </td>
                         <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200 max-w-xs truncate">
                             {{ $request->description }}
@@ -116,16 +121,68 @@
                 {{-- Request Type --}}
                 <x-ui.field>
                     <x-ui.label for="request_type" text="Request Type" />
-                    <x-ui.select id="request_type" wire:model="form.type" placeholder="Select Request Type" triggerClass="py-2.5 px-3">
+                    <x-ui.select id="request_type" wire:model.live="form.type" placeholder="Select Request Type" triggerClass="py-2.5 px-3">
                         <x-ui.select.option value="maintenance">Maintenance</x-ui.select.option>
                         <x-ui.select.option value="complaint">Complaint</x-ui.select.option>
                         <x-ui.select.option value="others">Others</x-ui.select.option>
                     </x-ui.select>
                 </x-ui.field>
+
+                @if($form->type === 'complaint')
+                <x-ui.field>
+                    <x-ui.label for="complaint_type" text="Complaint Type" />
+                    <x-ui.select id="complaint_type" wire:model.live="form.complaint_type" placeholder="Select Complaint Type" triggerClass="py-2.5 px-3">
+                        <x-ui.select.option value="general">General</x-ui.select.option>
+                        <x-ui.select.option value="specific">Specific</x-ui.select.option>
+                    </x-ui.select>
+                </x-ui.field>
+
+                @if($form->complaint_type === 'general')
+                <x-ui.field>
+                    <x-ui.label for="complaint_topic" text="Complaint Topic" />
+                    <x-ui.select id="complaint_topic" wire:model.live="form.complaint_topic" placeholder="Select Topic" triggerClass="py-2.5 px-3">
+                        <x-ui.select.option value="noise">Noise</x-ui.select.option>
+                        <x-ui.select.option value="littering">Littering</x-ui.select.option>
+                        <x-ui.select.option value="parking_obstruction">Parking Obstruction</x-ui.select.option>
+                        <x-ui.select.option value="vandalism">Vandalism</x-ui.select.option>
+                        <x-ui.select.option value="pets">Pets</x-ui.select.option>
+                        <x-ui.select.option value="other">Other</x-ui.select.option>
+                    </x-ui.select>
+                </x-ui.field>
+                @endif
+
+                @if($form->complaint_type === 'specific')
+                <x-ui.field>
+                    <x-ui.label for="reported_tenant_id" text="Reported Tenant" />
+                    <x-ui.select id="reported_tenant_id" wire:model.live="form.reported_tenant_id" placeholder="Select Reported Tenant" triggerClass="py-2.5 px-3">
+                        @foreach($this->propertyTenants as $propertyTenant)
+                        <x-ui.select.option value="{{ $propertyTenant->id }}">
+                            {{ $propertyTenant->user->full_name }}
+                        </x-ui.select.option>
+                        @endforeach
+                    </x-ui.select>
+                </x-ui.field>
+
+                <x-ui.field>
+                    <x-ui.label for="reported_unit_id" text="Reported Unit" />
+                    <x-ui.select id="reported_unit_id" wire:model.live="form.reported_unit_id" placeholder="Select Reported Unit" triggerClass="py-2.5 px-3">
+                        @foreach($this->propertyUnits as $propertyUnit)
+                        <x-ui.select.option value="{{ $propertyUnit->id }}">
+                            {{ $propertyUnit->unit_number }}
+                        </x-ui.select.option>
+                        @endforeach
+                    </x-ui.select>
+                </x-ui.field>
+                @endif
+                @endif
+
                 {{-- Description --}}
                 <x-ui.field>
-                    <x-ui.label for="description" text="Description" />
-                    <x-ui.textarea id="description" wire:model="form.description" rows="4" placeholder="Describe your request or complaint in detail..." />
+                    <x-ui.label for="description" text="{{ $form->type === 'complaint' && $form->complaint_type === 'specific' ? 'Detailed Reason' : 'Description' }}" />
+                    <x-ui.description>
+                        {{ $form->type === 'complaint' && $form->complaint_type === 'general' ? 'Add brief details for quick owner review.' : ($form->type === 'complaint' && $form->complaint_type === 'specific' ? 'Please provide complete details for this high-priority complaint.' : 'Describe your request or complaint in detail.') }}
+                    </x-ui.description>
+                    <x-ui.textarea id="description" wire:model="form.description" rows="4" placeholder="{{ $form->type === 'complaint' && $form->complaint_type === 'general' ? 'Brief details...' : 'Describe your request or complaint in detail...' }}" />
                 </x-ui.field>
 
                 @if ($errors->any())
@@ -166,6 +223,42 @@
                         {{ ucfirst($selectedRequest->type) }}
                     </p>
                 </div>
+                @if($selectedRequest->type === 'complaint')
+                <div class="w-full">
+                    <p class="text-xs text-neutral-500 uppercase">Complaint Type</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                        {{ ucfirst($selectedRequest->complaint_type ?? 'N/A') }}
+                    </p>
+                </div>
+                <div class="w-full">
+                    <p class="text-xs text-neutral-500 uppercase">Priority</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                        {{ ucfirst($selectedRequest->complaint_priority ?? 'N/A') }}
+                    </p>
+                </div>
+                @if($selectedRequest->complaint_type === 'general')
+                <div class="w-full">
+                    <p class="text-xs text-neutral-500 uppercase">Complaint Topic</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                        {{ ucfirst(str_replace('_', ' ', $selectedRequest->complaint_topic ?? 'N/A')) }}
+                    </p>
+                </div>
+                @endif
+                @if($selectedRequest->complaint_type === 'specific')
+                <div class="w-full">
+                    <p class="text-xs text-neutral-500 uppercase">Reported Tenant</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                        {{ $selectedRequest->reportedTenant->user->full_name ?? 'N/A' }}
+                    </p>
+                </div>
+                <div class="w-full">
+                    <p class="text-xs text-neutral-500 uppercase">Reported Unit</p>
+                    <p class="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+                        {{ $selectedRequest->reportedUnit->unit_number ?? 'N/A' }}
+                    </p>
+                </div>
+                @endif
+                @endif
                 <div class="w-full">
                     <p class="text-xs text-neutral-500 uppercase">Status</p>
                     <x-ui.badge color="{{ $selectedRequest->status === 'pending' ? 'amber' : ($selectedRequest->status === 'in_progress' ? 'sky' : ($selectedRequest->status === 'rejected' ? 'rose' : 'emerald')) }}">
