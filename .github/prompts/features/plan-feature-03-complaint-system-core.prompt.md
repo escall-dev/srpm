@@ -55,6 +55,30 @@ Support two complaint types (general and specific), force type selection before 
 - Continue using existing owner requests page as receiving queue.
 - No separate complaint table/module.
 
+### System Design Alignment
+1. Role and scope alignment:
+- Keep tenant complaint creation and owner review restricted to active property boundaries.
+- Require server-side checks for reported tenant/unit ownership under the same property.
+2. Laravel and Livewire pattern alignment:
+- Extend existing request form and request pages; avoid parallel complaint module architecture.
+- Keep validation branching inside established form pattern for request type handling.
+3. Data model alignment:
+- Add complaint metadata only on existing `requests` table.
+- Add indexes to match owner queue filters and lookup paths.
+4. Integration alignment:
+- Preserve non-complaint request behavior and existing request lifecycle methods.
+- Emit compatible metadata for downstream features 04-10.
+5. Dependency alignment:
+- Feature dependencies: none.
+- Must provide stable complaint fields for features 04, 05, 06, 07, 08, 09, and 10.
+
+### System Design Checklist
+1. Complaint paths are property-scoped with server-side enforcement.
+2. Existing request architecture is extended rather than replaced.
+3. Request schema and index additions align with query patterns.
+4. Non-complaint flows remain behaviorally unchanged.
+5. Downstream complaint/demerit/automation integrations have required fields.
+
 ### Verification Checklist
 1. Complaint submit is blocked unless complaint type selected.
 2. General and specific validations trigger correctly.

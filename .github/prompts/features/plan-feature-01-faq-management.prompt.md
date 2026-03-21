@@ -68,6 +68,30 @@ Implement owner-managed FAQ content per property with CRUD, categories, tenant v
 - Owner can read/write only FAQs where `property_id = auth()->user()->owner->active_property`.
 - Category and FAQ cross-property assignment must be blocked in server-side validation.
 
+### System Design Alignment
+1. Role and scope alignment:
+- Enforce server-side owner scope via active property on all FAQ/category read-write actions.
+- Reject payloads that attempt cross-property category or FAQ assignment.
+2. Laravel and Livewire pattern alignment:
+- Reuse Livewire list/filter/pagination patterns from existing owner pages.
+- Reuse shared concerns (for example toast and modal concerns) instead of new duplicate helpers.
+3. Data model alignment:
+- Follow existing FK naming and indexing conventions for query-heavy columns.
+- Keep category uniqueness scoped to property and preserve sort ordering behavior.
+4. Integration alignment:
+- Keep FAQ management isolated from complaint/demerit flows.
+- Ensure tenant FAQ consumers only read owner-published property-scoped data.
+5. Dependency alignment:
+- Feature dependencies: none.
+- Must remain compatible with Feature 02 tenant FAQ consumption.
+
+### System Design Checklist
+1. All owner actions are server-scoped by active property.
+2. Existing Livewire concern/pattern reuse is preserved.
+3. Schema constraints and indexes match established conventions.
+4. No coupling introduced with complaint or demerit modules.
+5. Contracts required by Feature 02 remain stable.
+
 ### Verification Checklist
 1. Owner can create, edit, delete FAQ entries.
 2. Owner can create and reuse categories.

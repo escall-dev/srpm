@@ -93,6 +93,30 @@ Automatically launch an onboarding tour on first login, highlight key menus/butt
 - Users can only read/write their own onboarding progress.
 - Tour definitions are role-scoped (owner vs tenant).
 
+### System Design Alignment
+1. Role and scope alignment:
+- Enforce per-user onboarding progress ownership on all read/write actions.
+- Keep tour content and trigger behavior strictly role-scoped (owner vs tenant).
+2. Laravel and Livewire pattern alignment:
+- Render onboarding through shared layout/component integration, not duplicated page-specific widgets.
+- Reuse existing dashboard entry points and sidebar patterns for launch/revisit behavior.
+3. Data model alignment:
+- Maintain unique user-tour progress record constraints and version tracking fields.
+- Persist step completion incrementally to support refresh-safe continuation.
+4. Integration alignment:
+- Keep onboarding independent from complaint/demerit logic while optionally surfacing notification hints.
+- Preserve compatibility with existing auth/login flow and role dashboards.
+5. Dependency alignment:
+- Feature dependencies: none.
+- Must not alter or block unrelated role workflows beyond required onboarding gating rules.
+
+### System Design Checklist
+1. Users can access only their own progress and permitted tour definitions.
+2. Shared layouts/components are used for tour rendering across role areas.
+3. Progress/version schema constraints remain consistent and idempotent.
+4. Existing dashboard/auth flows continue working with onboarding hooks.
+5. Cross-feature isolation from complaint/demerit modules is preserved.
+
 ### Verification Checklist
 1. First login triggers tour automatically.
 2. Highlight anchors target key menus/buttons/features correctly.

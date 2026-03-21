@@ -41,6 +41,30 @@ Require tenant, unit, and detailed reason for serious complaints, route clearly 
 - Disallow mismatched tenant-unit combinations when applicable.
 - Prevent self-targeting if policy requires (optional business rule).
 
+### System Design Alignment
+1. Role and scope alignment:
+- Enforce that reported tenant and reported unit are valid within the same property scope.
+- Keep all target validation server-side to prevent payload tampering.
+2. Laravel and Livewire pattern alignment:
+- Build specific complaint fields as a conditional extension of existing request form flows.
+- Reuse owner-side request detail rendering patterns for target metadata display.
+3. Data model alignment:
+- Persist `reported_tenant_id` and `reported_unit_id` using established FK conventions.
+- Keep high-priority assignment deterministic for specific complaints.
+4. Integration alignment:
+- Maintain compatibility with owner decision flow from Feature 06.
+- Provide clean inputs for demerit processing and enforcement in Features 07 and 08.
+5. Dependency alignment:
+- Feature dependencies: Feature 03.
+- Must follow complaint metadata contracts established by Feature 03 and consumed by Feature 06.
+
+### System Design Checklist
+1. Reported tenant/unit are property-valid and server-verified.
+2. Existing request form architecture is extended, not duplicated.
+3. Specific complaint fields use compliant FK conventions.
+4. Owner dashboard and decision integration remains seamless.
+5. Downstream demerit/enforcement modules receive valid targeting data.
+
 ### Verification Checklist
 1. Specific complaint cannot submit without target tenant/unit/reason.
 2. Specific complaint always receives high priority.

@@ -31,3 +31,4 @@ Use these plans independently to avoid cross-feature ambiguity and reduce implem
 - Plans 01 and 02 are FAQ-focused and can be implemented in parallel with complaint tracks after schema alignment.
 - Keep decisions fixed: demerits come from approved complaints only; FAQ scope is per property.
 - Plan 11 is independent from complaint/demerit logic and can be implemented in parallel after role layouts are confirmed.
+- For every plan file, complete the "System Design Alignment" section before implementation to ensure consistency with architecture, authorization, and cross-feature dependencies.

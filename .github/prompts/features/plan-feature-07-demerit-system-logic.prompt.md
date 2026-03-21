@@ -52,6 +52,30 @@ Apply one demerit per approved complaint, cap at 5, block further increments aft
 - tenant dashboard/status section
 6. Add server-side guard against direct over-increment updates.
 
+### System Design Alignment
+1. Role and scope alignment:
+- Award demerits only for approved complaints already authorized in owner workflow.
+- Ensure demerit updates are tied to property-valid complaint records.
+2. Laravel and Livewire pattern alignment:
+- Centralize awarding logic in service layer and call it from existing owner request actions.
+- Reuse current dashboard rendering patterns for exposing demerit status.
+3. Data model alignment:
+- Keep one demerit ledger row per complaint request via unique `request_id`.
+- Enforce cap logic at service layer and protect against direct model over-increment writes.
+4. Integration alignment:
+- Expose enforcement status transitions for Feature 08.
+- Provide deterministic event points for notifications in Feature 09 and automation in Feature 10.
+5. Dependency alignment:
+- Feature dependencies: Feature 06 owner decision flow.
+- Must consume complaint metadata from Feature 03 and preserve downstream enforcement contracts.
+
+### System Design Checklist
+1. Demerit awards only occur from approved complaint decisions.
+2. Service-based idempotent logic is the single write path.
+3. Ledger and tenant counters stay consistent and capped.
+4. Enforcement and notification integrations receive stable trigger states.
+5. Dashboard visibility reuses established owner/tenant page patterns.
+
 ### Verification Checklist
 1. Each approved complaint adds exactly 1 demerit.
 2. Re-approving same complaint does not add another point.

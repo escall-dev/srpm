@@ -55,6 +55,30 @@ Show tenants only FAQs tied to their active lease property, with search, categor
 - Tenant cannot read FAQ outside active property scope.
 - Tenant cannot submit feedback for FAQ outside active property scope.
 
+### System Design Alignment
+1. Role and scope alignment:
+- Resolve FAQ visibility only through tenant active lease to property chain.
+- Enforce feedback ownership and property scope server-side.
+2. Laravel and Livewire pattern alignment:
+- Reuse tenant page search/filter binding patterns already used in requests pages.
+- Keep feedback mutation paths inside existing Livewire action patterns.
+3. Data model alignment:
+- Keep one-vote-per-tenant-per-FAQ via unique constraint.
+- Maintain indexed foreign keys for FAQ and tenant lookups.
+4. Integration alignment:
+- Read only visible FAQs from Feature 01 owner-managed content.
+- Do not introduce direct dependency on complaint, demerit, or enforcement modules.
+5. Dependency alignment:
+- Feature dependencies: Feature 01.
+- Use only stable schema contracts from FAQ and category tables.
+
+### System Design Checklist
+1. FAQ and feedback access is strictly lease/property scoped.
+2. Existing tenant Livewire interaction patterns are reused.
+3. Feedback schema enforces idempotent voting and lookup performance.
+4. No cross-module coupling beyond FAQ domain.
+5. Feature 01 table and relation contracts are honored.
+
 ### Verification Checklist
 1. Tenant sees only property-scoped visible FAQs.
 2. Search and category filter work together.

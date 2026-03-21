@@ -45,6 +45,30 @@ Run daily checks for rent due reminders and demerit threshold monitoring, trigge
 - Daily cadence is primary requirement.
 - If retaining hourly checks, add once-per-day guards for reminder events.
 
+### System Design Alignment
+1. Role and scope alignment:
+- Ensure automation jobs act only on records that satisfy existing authorization and tenancy boundaries.
+- Avoid bypassing business guards when commands mutate enforcement or notification state.
+2. Laravel and Livewire pattern alignment:
+- Implement scheduled behavior through console commands and `routes/console.php` scheduler only.
+- Keep business rules delegated to existing services (for example demerit service) rather than command-local duplication.
+3. Data model alignment:
+- Store structured audit output in `automation_logs` with stable action keys.
+- Ensure logging payloads reference valid model identity pairs (`reference_type`, `reference_id`).
+4. Integration alignment:
+- Reuse rent reminder flow from notification system.
+- Keep reconciliation aligned with enforcement transitions from Features 07 and 08.
+5. Dependency alignment:
+- Feature dependencies: Features 07, 08, and 09.
+- Must remain compatible with existing lease payment checks and scheduler conventions.
+
+### System Design Checklist
+1. Commands do not bypass existing business/service guards.
+2. Scheduler setup uses established console scheduling patterns.
+3. Automation log records are structured, consistent, and queryable.
+4. Notification and enforcement outcomes are idempotent per run.
+5. Existing payment-check command behavior stays compatible.
+
 ### Verification Checklist
 1. Scheduled commands execute on configured daily cadence.
 2. Rent reminders are sent ahead of due date.

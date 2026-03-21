@@ -40,6 +40,30 @@ Trigger and deliver in-app notifications for rent reminders, demerit warning at 
 - Keep messages concise and action-oriented.
 - Include key context (unit, due date, reason, threshold state).
 
+### System Design Alignment
+1. Role and scope alignment:
+- Deliver notifications only to authorized recipients within owner/tenant role boundaries.
+- Ensure read and mark-as-read actions are limited to the authenticated recipient.
+2. Laravel and Livewire pattern alignment:
+- Reuse existing Notification model and shared notifications component pathways.
+- Trigger events from existing services/commands instead of duplicating dispatch logic per page.
+3. Data model alignment:
+- Keep notification type keys stable and centrally defined.
+- Preserve `is_read` semantics and existing query/index behavior for unread views.
+4. Integration alignment:
+- Consume demerit/enforcement state changes from Features 07 and 08.
+- Support scheduler-driven reminders and automation logging integration from Feature 10.
+5. Dependency alignment:
+- Feature dependencies: Features 07 and 08.
+- Optional complaint decision alerts depend on Feature 06 decision actions.
+
+### System Design Checklist
+1. Recipient access is enforced server-side for notification data and actions.
+2. Existing model/component notification architecture is reused.
+3. Notification type contracts remain stable across producers.
+4. Demerit/enforcement/scheduler integrations are wired to shared event points.
+5. Unread and read-state behavior remains backward compatible.
+
 ### Verification Checklist
 1. Each target event creates exactly one notification per recipient per event instance.
 2. Unread tab displays newly created alerts.

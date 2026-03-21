@@ -48,6 +48,30 @@ At 3 demerits send warning, at 5 trigger contract termination state, restrict te
 - Termination transition should be idempotent.
 - Once terminated, demerit count cannot increase beyond cap.
 
+### System Design Alignment
+1. Role and scope alignment:
+- Apply enforcement transitions only from authenticated system flows tied to tenant records.
+- Keep restrictions server-enforced for terminated tenants on write actions.
+2. Laravel and Livewire pattern alignment:
+- Implement threshold transitions in shared demerit service, not scattered component logic.
+- Apply UI restrictions through existing tenant page actions and middleware where appropriate.
+3. Data model alignment:
+- Keep tenant enforcement status as single source of truth for warning/final/terminated state.
+- Ensure lease termination calls are idempotent and consistent with existing lease lifecycle methods.
+4. Integration alignment:
+- Trigger notification events through Feature 09-compatible paths.
+- Keep automation reconciliation compatibility for Feature 10 scheduled checks.
+5. Dependency alignment:
+- Feature dependencies: Feature 07.
+- Must preserve existing read-only transparency views for tenant and owner dashboards.
+
+### System Design Checklist
+1. Enforcement transitions are service-driven and idempotent.
+2. Terminated tenant write actions are blocked server-side.
+3. Lease termination flow is executed consistently and safely.
+4. Notification and automation hooks remain compatible.
+5. Dashboard status outputs remain clear and role-appropriate.
+
 ### Verification Checklist
 1. Exactly at 3 demerits warning state is set.
 2. At 5 demerits tenant enters terminated state.

@@ -43,6 +43,30 @@ Provide owners a complaint-focused dashboard with filtering, decision controls, 
 - Owner can review only requests tied to active property.
 - Decision action should be idempotent and locked after final decision.
 
+### System Design Alignment
+1. Role and scope alignment:
+- Keep all owner complaint review and decisions scoped to active property data.
+- Ensure decision actions cannot be executed across unauthorized requests.
+2. Laravel and Livewire pattern alignment:
+- Extend existing owner requests page and modal patterns rather than building a disconnected dashboard stack.
+- Reuse shared concerns for consistent toast/state handling.
+3. Data model alignment:
+- Consume complaint metadata fields added in Feature 03 without introducing redundant storage.
+- Keep decision state transitions idempotent and auditable.
+4. Integration alignment:
+- Route approvals through centralized demerit service from Feature 07.
+- Keep notification/event hooks compatible with Feature 09.
+5. Dependency alignment:
+- Feature dependencies: Features 03, 04, and 05.
+- Must not regress existing non-complaint request workflows.
+
+### System Design Checklist
+1. Owner actions enforce active-property authorization on server side.
+2. Existing owner requests architecture and concerns are reused.
+3. Complaint decision states remain consistent and idempotent.
+4. Demerit and notification integrations are triggered through shared services.
+5. Non-complaint request behavior remains intact.
+
 ### Verification Checklist
 1. Filters by type/subtype/decision/status all work.
 2. Owner can approve/reject complaint requests.
