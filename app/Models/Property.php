@@ -57,4 +57,20 @@ class Property extends Model
     {
         return $this->hasOne(PaymentRule::class);
     }
+
+    /**
+     * Get the FAQ categories for the property.
+     */
+    public function faqCategories(): HasMany
+    {
+        return $this->hasMany(FaqCategory::class);
+    }
+
+    /**
+     * Get the FAQs for the property.
+     */
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(Faq::class);
+    }
 }

@@ -11,6 +11,7 @@ use App\Livewire\Tenant\Common\Settings as TenantSettings;
 use App\Livewire\Tenant\Pages\Leases as TenantLeases;
 use App\Livewire\Tenant\Pages\ViewLeaseDetails as TenantViewLeaseDetails;
 use App\Livewire\Tenant\Pages\Payments as TenantPayments;
+use App\Livewire\Tenant\Pages\Faqs as TenantFaqs;
 use App\Livewire\Tenant\Pages\Requests as TenantRequests;
 // Owner
 use App\Http\Controllers\FilePreviewController;
@@ -25,6 +26,7 @@ use App\Livewire\Owner\Pages\Units as OwnerUnits;
 use App\Livewire\Owner\Pages\Expenses;
 use App\Livewire\Owner\Pages\Properties as OwnerProperties;
 use App\Livewire\Owner\Pages\Payments as OwnerPayments;
+use App\Livewire\Owner\Pages\Faqs as OwnerFaqs;
 use App\Livewire\Owner\Pages\Requests as OwnerRequests;
 use App\Livewire\Owner\Pages\ViewTenantPayments;
 use Illuminate\Support\Facades\Route;
@@ -127,6 +129,9 @@ Route::group([
         // REQUESTS
         Route::get('requests', OwnerRequests::class)
             ->name('requests');
+        // FAQS
+        Route::get('faqs', OwnerFaqs::class)
+            ->name('faqs');
         // AUTOMATION LOGS
         Route::get('automation-logs', OwnerAutomationLogs::class)
             ->name('automation.logs');
@@ -210,6 +215,10 @@ Route::group([
         // REQUESTS
         Route::get('requests', TenantRequests::class)
             ->name('requests');
+
+        // FAQS
+        Route::get('faqs', TenantFaqs::class)
+            ->name('faqs');
 
         // SETTINGS
         Route::get('settings', TenantSettings::class)

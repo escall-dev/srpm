@@ -44,6 +44,16 @@
                        </a>
                    </li>
 
+                   {{-- FAQs --}}
+                   <li class="group">
+                       <a wire:navigate.hover href="{{ route('tenant.faqs') }}" @class([ "flex items-center gap-x-2 py-2.5 px-4.5 text-sm font-medium leading-6 text-neutral-700 dark:text-neutral-200 border-l-4 border-transparent transition-all duration-200 ease-in-out group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 group-hover:text-primary dark:group-hover:text-indigo-400 group-hover:border-primary" , "bg-indigo-100 dark:bg-indigo-900/40 text-primary dark:!text-indigo-400 !border-primary"=>request()->routeIs('tenant.faqs') ])>
+                           <x-ui.icon name="question-mark-circle" @class(["size-5 shrink-0 group-hover:text-primary dark:group-hover:text-indigo-400", "text-primary dark:!text-indigo-400"=> request()->routeIs('tenant.faqs')]) />
+                            <span class="h-5 leading-5">
+                                FAQs
+                            </span>
+                       </a>
+                   </li>
+
             </ul>
         </div>
     </li>

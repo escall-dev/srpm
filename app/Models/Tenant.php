@@ -85,6 +85,14 @@ class Tenant extends Model
         return $this->hasMany(ComplaintDemerit::class);
     }
 
+    /**
+     * Get FAQ feedback submitted by the tenant.
+     */
+    public function faqFeedback(): HasMany
+    {
+        return $this->hasMany(FaqFeedback::class);
+    }
+
     public function isTerminated(): bool
     {
         return $this->enforcement_status === 'terminated';
