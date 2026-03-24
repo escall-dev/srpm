@@ -108,4 +108,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+
+    /**
+     * Get the onboarding progress records for the user.
+     */
+    public function onboardingProgress(): HasMany
+    {
+        return $this->hasMany(OnboardingProgress::class);
+    }
+
+    public function hasCompletedOnboarding(string $tourKey): bool
+    {
+        return $this->onboardingProgress()
+            ->whereHas('onboardingTour', fn($q) => $q->where('key', $tourKey))
+            ->where('is_completed', true)
+            ->exists();
+    }
 }

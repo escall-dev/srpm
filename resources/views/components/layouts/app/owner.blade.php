@@ -25,6 +25,8 @@
             </div>
         </div>
 
+        <livewire:common.onboarding-tour />
+
         <x-ui.toast
             position="top-center"
             maxToasts="3"

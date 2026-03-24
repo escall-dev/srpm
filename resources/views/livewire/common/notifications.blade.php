@@ -1,6 +1,6 @@
 <div class="flex items-center justify-center mr-2">
     {{-- NOTIFICATIONS BUTTON --}}
-    <div class="relative">
+    <div class="relative" data-onboarding="notifications-bell">
         <x-ui.button x-on:click="$modal.open('notifications')" variant="soft" icon="ps:bell" class="text-neutral-600 dark:text-neutral-200 hover:bg-indigo-100 dark:hover:bg-neutral-700" />
         @if ($this->notifications->where(fn($query) => !$query->is_read)?->count() > 0)
         <span class="absolute right-1.5 top-1.5">

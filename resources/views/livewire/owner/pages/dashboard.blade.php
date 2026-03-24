@@ -19,7 +19,7 @@
     </div>
 
     {{-- === Analytics Cards === --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5" data-onboarding="owner-dashboard-overview">
         <x-ui.card hoverless size="full" class="flex flex-col items-center justify-center h-24">
             <h2 class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 truncate">₱ {{ number_format($totalIncome, 2) ?? 0.00 }}</h2>
             <div class="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
