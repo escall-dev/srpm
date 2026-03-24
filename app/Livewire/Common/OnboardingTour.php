@@ -64,11 +64,7 @@ class OnboardingTour extends Component
         $this->isCompleted = $progress->is_completed;
         $this->completedRequiredSteps = $progress->required_steps_completed ?? [];
 
-        if ($progress->is_completed && $progress->last_seen_version === $tour->version) {
-            $this->isOpen = false;
-
-            return;
-        }
+        $isFirstLoginForTour = ! $progress->started_at;
 
         if ($progress->is_completed && $progress->last_seen_version !== $tour->version) {
             $progress->update([
@@ -85,15 +81,16 @@ class OnboardingTour extends Component
 
         $this->currentStepIndex = $this->resolveStepIndexFromProgress($progress);
 
-        if (! $progress->started_at) {
+        if ($isFirstLoginForTour) {
             $this->isOpen = true;
             $progress->update([
                 'started_at' => now(),
                 'current_step_index' => $this->currentStepIndex,
                 'last_step_key' => $this->steps[$this->currentStepIndex]['key'] ?? null,
             ]);
-        } elseif (! $progress->is_completed) {
-            $this->isOpen = true;
+        } else {
+            // Auto-open is allowed only on first login for this tour.
+            $this->isOpen = false;
             $this->syncProgressIndices($progress);
         }
     }

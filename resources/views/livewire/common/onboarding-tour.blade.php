@@ -1,5 +1,5 @@
 <div>
-    @if($steps && !$isCompleted)
+    @if($steps)
         <div
             x-data="onboardingTour({
                 steps: @js($steps),
