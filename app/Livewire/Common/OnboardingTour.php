@@ -7,6 +7,7 @@ use App\Models\OnboardingTour as OnboardingTourModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 class OnboardingTour extends Component
@@ -98,6 +99,7 @@ class OnboardingTour extends Component
     /**
      * Re-read progress from the database so wire:navigate prefetch cannot leave a stale step index in memory.
      */
+    #[Renderless]
     public function reloadProgressFromDatabase(): void
     {
         if (! $this->progressId || ! $this->steps) {
@@ -116,6 +118,7 @@ class OnboardingTour extends Component
     /**
      * If the URL clearly corresponds to exactly one tour step ahead of the current index, catch up (fixes missed advances).
      */
+    #[Renderless]
     public function syncTourToPath(string $path): void
     {
         if (! $this->isOpen || ! $this->steps || $this->tourRole === null) {
@@ -158,50 +161,47 @@ class OnboardingTour extends Component
         }
     }
 
+    #[Renderless]
     public function advanceAfterNavigation(string $completedStepKey): void
     {
-        $currentKey = $this->steps[$this->currentStepIndex]['key'] ?? null;
-
-        if ($currentKey !== $completedStepKey) {
+        if (! $this->steps) {
             return;
         }
 
         $this->markCurrentStepRequired();
-
-        if ($this->currentStepIndex < count($this->steps) - 1) {
-            $this->currentStepIndex++;
-            $this->persistProgress();
-        }
+        $this->persistProgress();
     }
 
+    #[Renderless]
+    public function persistStep(int $stepIndex): void
+    {
+        $max = max(0, count($this->steps ?? []) - 1);
+        $this->currentStepIndex = min(max(0, $stepIndex), $max);
+        $this->markCurrentStepRequired();
+        $this->persistProgress();
+    }
+
+    #[Renderless]
     public function nextStep(): void
     {
         $this->markCurrentStepRequired();
-
-        if ($this->currentStepIndex < count($this->steps) - 1) {
-            $this->currentStepIndex++;
-            $this->persistProgress();
-        }
+        $this->persistProgress();
     }
 
+    #[Renderless]
     public function autoAdvance(): void
     {
         $this->markCurrentStepRequired();
-
-        if ($this->currentStepIndex < count($this->steps) - 1) {
-            $this->currentStepIndex++;
-            $this->persistProgress();
-        }
+        $this->persistProgress();
     }
 
+    #[Renderless]
     public function previousStep(): void
     {
-        if ($this->currentStepIndex > 0) {
-            $this->currentStepIndex--;
-            $this->persistProgress();
-        }
+        $this->persistProgress();
     }
 
+    #[Renderless]
     public function completeTour(): void
     {
         $this->markCurrentStepRequired();
@@ -224,6 +224,7 @@ class OnboardingTour extends Component
         $this->isOpen = false;
     }
 
+    #[Renderless]
     public function dismissTour(): void
     {
         $this->persistProgress();
